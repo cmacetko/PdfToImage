@@ -17,6 +17,7 @@ function PDFImage(pdfFilePath, options) {
   this.setConvertExtension(options.convertExtension);
   this.useGM = options.graphicsMagick || false;
   this.combinedImage = options.combinedImage || false;
+  this.QtdPaginas = options.QtdPaginas || 0;
 
   this.outputDirectory = options.outputDirectory || path.dirname(pdfFilePath);
 }
@@ -151,12 +152,29 @@ PDFImage.prototype = {
     return new Promise(function (resolve, reject) {
       pdfImage.numberOfPages().then(function (totalPages) {
 
+        totalPages              = parseInt(totalPages);
+        pdfImage.QtdPaginas     = parseInt(pdfImage.QtdPaginas);
+
+        if( pdfImage.QtdPaginas == 0 && totalPages >= 1 ){
+
+            var QtdPaginas = totalPages;
+
+        }else if( pdfImage.QtdPaginas > totalPages ){ 
+
+            var QtdPaginas = totalPages;
+
+        }else{
+
+            var QtdPaginas = pdfImage.QtdPaginas;
+
+        }
+        
         var convertPromise = new Promise(function (resolve, reject){
           var imagePaths = [];
-          for (var i = 0; i < totalPages; i++) {
+          for (var i = 0; i < QtdPaginas; i++) {
             pdfImage.convertPage(i).then(function(imagePath){
               imagePaths.push(imagePath);
-              if (imagePaths.length === parseInt(totalPages)){
+              if (imagePaths.length === parseInt(QtdPaginas)){
                 imagePaths.sort(); //because of asyc pages we have to reSort pages
                 resolve(imagePaths);
               }
